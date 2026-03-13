@@ -22,12 +22,6 @@ class PrivateBookingsPage extends StatelessWidget {
           title: const Text('Private Bookings',
               style: TextStyle(fontWeight: FontWeight.w600)),
           elevation: 0,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: () => vm.loadBookings(context, refresh: true),
-            ),
-          ],
         ),
         body: vm.isLoading && vm.bookings.isEmpty
             ? const Center(child: CircularProgressIndicator())

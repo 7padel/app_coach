@@ -1,8 +1,11 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import '../core/base/base_view.dart';
 import '../core/constants/app_colors.dart';
 import '../core/constants/app_strings.dart';
+import '../core/services/api_service.dart';
 import '../core/utils/app_utils.dart';
 import '../core/utils/page_route_utils.dart';
 import '../viewmodels/register_view_model.dart';
@@ -30,6 +33,8 @@ class RegisterView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                _ProfilePicturePicker(model: model),
+                const SizedBox(height: 8),
                 _label('Full Name *'),
                 _field(model.fullNameCtrl, 'Enter your full name'),
                 _label('Phone Number *'),
@@ -66,7 +71,7 @@ class RegisterView extends StatelessWidget {
                   ],
                   onChanged: (v) => model.setGender(v!),
                 ),
-                _label('Date of Birth'),
+                _label('Date of Birth *'),
                 _datePickerRow(context, model),
                 _label('Years of Experience *'),
                 _numberField(
@@ -108,21 +113,18 @@ class RegisterView extends StatelessWidget {
                     ? const Center(
                         child: CircularProgressIndicator(color: AppColors.primary))
                     : Button(
-                        color: AppColors.primary,
-                        onPressed: model.isValid
-                            ? () async {
-                                final response = await model.register(context);
-                                if (response?.status == true && context.mounted) {
-                                  PageRouteUtils.pushAndRemoveUntil(
-                                    context,
-                                    const StatusPage(approvalStatus: 'pending'),
-                                  );
-                                } else if (response?.status == false) {
-                                  AppUtils.showToast(
-                                      response?.message ?? 'Registration failed');
-                                }
-                              }
-                            : null,
+                        onPressed: () async {
+                          final response = await model.register(context);
+                          if (response?.status == true && context.mounted) {
+                            PageRouteUtils.pushAndRemoveUntil(
+                              context,
+                              const StatusPage(approvalStatus: 'pending'),
+                            );
+                          } else if (response?.status == false) {
+                            AppUtils.showToast(
+                                response?.message ?? 'Registration failed');
+                          }
+                        },
                         text: AppStrings.register,
                       ),
                 const SizedBox(height: 24),
@@ -184,11 +186,13 @@ class RegisterView extends StatelessWidget {
 
   Widget _datePickerRow(BuildContext context, RegisterViewModel model) => GestureDetector(
         onTap: () async {
+          final now = DateTime.now();
+          final maxDate = DateTime(now.year - 18, now.month, now.day);
           final picked = await showDatePicker(
             context: context,
             initialDate: DateTime(1990),
             firstDate: DateTime(1950),
-            lastDate: DateTime.now().subtract(const Duration(days: 365 * 16)),
+            lastDate: maxDate,
           );
           if (picked != null) model.setDateOfBirth(picked);
         },
@@ -203,7 +207,7 @@ class RegisterView extends StatelessWidget {
             children: [
               Text(
                 model.dateOfBirth != null
-                    ? '${model.dateOfBirth!.day}/${model.dateOfBirth!.month}/${model.dateOfBirth!.year}'
+                    ? '${model.dateOfBirth!.day.toString().padLeft(2, '0')}/${model.dateOfBirth!.month.toString().padLeft(2, '0')}/${model.dateOfBirth!.year}'
                     : 'Select date',
                 style: TextStyle(
                     color: model.dateOfBirth != null ? AppColors.textDark : Colors.black38),
@@ -234,4 +238,77 @@ class RegisterView extends StatelessWidget {
           ),
         ],
       );
+}
+
+class _ProfilePicturePicker extends StatefulWidget {
+  final RegisterViewModel model;
+  const _ProfilePicturePicker({required this.model});
+
+  @override
+  State<_ProfilePicturePicker> createState() => _ProfilePicturePickerState();
+}
+
+class _ProfilePicturePickerState extends State<_ProfilePicturePicker> {
+  File? _imageFile;
+  bool _uploading = false;
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery, maxWidth: 800);
+    if (picked == null) return;
+
+    setState(() {
+      _imageFile = File(picked.path);
+      _uploading = true;
+    });
+
+    try {
+      final docId = await ApiService().uploadDocument(picked.path);
+      widget.model.setProfilePictureId(docId);
+      AppUtils.showToast('Profile image uploaded');
+    } catch (e) {
+      AppUtils.showToast('Image upload failed');
+      setState(() => _imageFile = null);
+    } finally {
+      setState(() => _uploading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: GestureDetector(
+        onTap: _uploading ? null : _pickImage,
+        child: Stack(
+          children: [
+            CircleAvatar(
+              radius: 50,
+              backgroundColor: Colors.grey[200],
+              backgroundImage: _imageFile != null ? FileImage(_imageFile!) : null,
+              child: _imageFile == null
+                  ? Icon(Icons.person, size: 50, color: Colors.grey[400])
+                  : null,
+            ),
+            if (_uploading)
+              const Positioned.fill(
+                child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+              ),
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                ),
+                child: const Icon(Icons.camera_alt, size: 16, color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

@@ -118,6 +118,32 @@ class ApiService {
     }
   }
 
+  // ─── Documents ────────────────────────────────────────────────────────────
+
+  /// Uploads a file to /documents and returns the document_id.
+  Future<String> uploadDocument(String filePath) async {
+    try {
+      final formData = FormData.fromMap({
+        'documents': await MultipartFile.fromFile(filePath),
+      });
+      AppLogger.print('POST', '${AppConfig.baseUrl}documents');
+      final response = await _dio.post('documents',
+          data: formData,
+          options: Options(
+            contentType: 'multipart/form-data',
+            validateStatus: (s) => s != null && s < 500,
+          ));
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final doc = (response.data['data'] as List).first;
+        return doc['document_id'] as String;
+      }
+      throw Exception(response.data['message'] ?? 'Upload failed');
+    } catch (e) {
+      AppLogger.print('Upload error', '$e');
+      rethrow;
+    }
+  }
+
   // ─── Auth ──────────────────────────────────────────────────────────────────
 
   Future<RegisterResponse> register(BuildContext context, Map<String, dynamic> payload) {

@@ -22,12 +22,6 @@ class HomePage extends StatelessWidget {
           title: const Text('My Schedule',
               style: TextStyle(fontWeight: FontWeight.w600)),
           elevation: 0,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: () => vm.loadSessions(context, refresh: true),
-            ),
-          ],
         ),
         body: vm.isLoading && vm.sessions.isEmpty
             ? const Center(child: CircularProgressIndicator())
