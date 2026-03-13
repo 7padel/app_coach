@@ -8,7 +8,7 @@ class PrivateBookingDetailPage extends StatelessWidget {
   const PrivateBookingDetailPage({super.key, required this.booking});
 
   Color get _statusColor {
-    switch (booking.status) {
+    switch (booking.status.toLowerCase()) {
       case 'confirmed':
         return const Color(0xFF22C55E);
       case 'cancelled':
@@ -16,6 +16,11 @@ class PrivateBookingDetailPage extends StatelessWidget {
       default:
         return const Color(0xFFF59E0B);
     }
+  }
+
+  String get _statusText {
+    if (booking.status.isEmpty) return booking.status;
+    return booking.status[0].toUpperCase() + booking.status.substring(1);
   }
 
   @override
@@ -51,7 +56,7 @@ class PrivateBookingDetailPage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
-                    booking.status,
+                    _statusText,
                     style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -91,7 +96,7 @@ class PrivateBookingDetailPage extends StatelessWidget {
                 icon: Icons.payment,
                 label: 'Price',
                 value:
-                    '${booking.currencyCode} ${booking.price.toStringAsFixed(0)}',
+                    '₹${booking.price.toStringAsFixed(0)}',
               ),
               _DetailRow(
                 icon: Icons.receipt_outlined,
@@ -161,49 +166,49 @@ class _PlayersCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 10),
             child: Row(
               children: [
-                Icon(Icons.people, size: 16, color: AppColors.primary),
-                const SizedBox(width: 8),
+                Icon(Icons.people, size: 20, color: AppColors.primary),
+                const SizedBox(width: 10),
                 const Text('Players',
                     style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
                         color: Color(0xFF1A1A1A))),
-                const SizedBox(width: 6),
+                const SizedBox(width: 8),
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text('${players.length}',
                       style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: AppColors.primary)),
                 ),
               ],
             ),
           ),
-          const Divider(height: 1),
+          const Divider(height: 1, indent: 20, endIndent: 20),
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: players.length,
             separatorBuilder: (_, __) =>
-                const Divider(height: 1, indent: 16),
+                const Divider(height: 1, indent: 20, endIndent: 20),
             itemBuilder: (_, i) {
               final p = players[i];
               return Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                 child: Row(
                   children: [
                     CircleAvatar(
-                      radius: 16,
+                      radius: 20,
                       backgroundColor:
                           AppColors.primary.withValues(alpha: 0.1),
                       child: Text(
@@ -211,25 +216,27 @@ class _PlayersCard extends StatelessWidget {
                             ? p.name![0].toUpperCase()
                             : '?',
                         style: TextStyle(
-                            fontSize: 13,
+                            fontSize: 16,
                             fontWeight: FontWeight.w600,
                             color: AppColors.primary),
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 14),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(p.name ?? 'Player',
                               style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
                                   color: Color(0xFF1A1A1A))),
-                          if (p.phone != null)
+                          if (p.phone != null) ...[
+                            const SizedBox(height: 4),
                             Text(p.phone!,
                                 style: const TextStyle(
-                                    fontSize: 11, color: Colors.black45)),
+                                    fontSize: 14, color: Colors.black45)),
+                          ],
                         ],
                       ),
                     ),
@@ -238,7 +245,7 @@ class _PlayersCard extends StatelessWidget {
               );
             },
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
         ],
       ),
     );
