@@ -22,12 +22,6 @@ class ProfilePage extends StatelessWidget {
           title: const Text('Profile',
               style: TextStyle(fontWeight: FontWeight.w600)),
           elevation: 0,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: () => vm.loadProfile(context),
-            ),
-          ],
         ),
         body: vm.isLoading
             ? const Center(child: CircularProgressIndicator())

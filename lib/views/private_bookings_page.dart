@@ -22,12 +22,6 @@ class PrivateBookingsPage extends StatelessWidget {
           title: const Text('Private Bookings',
               style: TextStyle(fontWeight: FontWeight.w600)),
           elevation: 0,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: () => vm.loadBookings(context, refresh: true),
-            ),
-          ],
         ),
         body: vm.isLoading && vm.bookings.isEmpty
             ? const Center(child: CircularProgressIndicator())
@@ -76,7 +70,7 @@ class _BookingCard extends StatelessWidget {
   const _BookingCard({required this.booking});
 
   Color get _statusColor {
-    switch (booking.status) {
+    switch (booking.status.toLowerCase()) {
       case 'confirmed':
         return const Color(0xFF22C55E);
       case 'cancelled':
@@ -84,6 +78,11 @@ class _BookingCard extends StatelessWidget {
       default:
         return const Color(0xFFF59E0B);
     }
+  }
+
+  String get _statusText {
+    if (booking.status.isEmpty) return booking.status;
+    return booking.status[0].toUpperCase() + booking.status.substring(1);
   }
 
   @override
@@ -139,7 +138,7 @@ class _BookingCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
-                    booking.status,
+                    _statusText,
                     style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
@@ -183,7 +182,7 @@ class _BookingCard extends StatelessWidget {
                 Text('${booking.durationMinutes} min',
                     style: const TextStyle(fontSize: 12, color: Colors.black45)),
                 Text(
-                  '${booking.currencyCode} ${booking.price.toStringAsFixed(0)}',
+                  '₹${booking.price.toStringAsFixed(0)}',
                   style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,

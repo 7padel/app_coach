@@ -229,7 +229,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             context: context,
             initialDate: _dob ?? DateTime(1995),
             firstDate: DateTime(1950),
-            lastDate: DateTime.now().subtract(const Duration(days: 365 * 16)),
+            lastDate: DateTime(DateTime.now().year - 18, DateTime.now().month, DateTime.now().day),
           );
           if (picked != null) setState(() => _dob = picked);
         },

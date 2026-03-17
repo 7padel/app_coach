@@ -57,7 +57,9 @@ class SessionDetailPage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
-                    session.status,
+                    session.status.isNotEmpty
+                        ? session.status[0].toUpperCase() + session.status.substring(1)
+                        : session.status,
                     style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,

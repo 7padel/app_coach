@@ -1,14 +1,15 @@
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/material.dart';
+import '../constants/app_colors.dart';
 
 class AppUtils {
-  static void showToast(String message) {
+  static void showToast(String message, {Color backgroundColor = AppColors.secondary}) {
     Fluttertoast.showToast(
       msg: message,
       toastLength: Toast.LENGTH_SHORT,
       gravity: ToastGravity.BOTTOM,
-      backgroundColor: Colors.black87,
-      textColor: Colors.white,
+      backgroundColor: backgroundColor,
+      textColor: Colors.black,
     );
   }
 }
