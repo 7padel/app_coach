@@ -11,10 +11,25 @@ class PrivateBookingDetailPage extends StatelessWidget {
     switch (booking.status.toLowerCase()) {
       case 'confirmed':
         return const Color(0xFF22C55E);
+      case 'completed':
+        return const Color(0xFF3B82F6);
       case 'cancelled':
         return const Color(0xFFEF4444);
       default:
         return const Color(0xFFF59E0B);
+    }
+  }
+
+  IconData get _statusIcon {
+    switch (booking.status.toLowerCase()) {
+      case 'confirmed':
+        return Icons.check_circle_outline;
+      case 'completed':
+        return Icons.task_alt;
+      case 'cancelled':
+        return Icons.cancel_outlined;
+      default:
+        return Icons.schedule;
     }
   }
 
@@ -46,7 +61,8 @@ class PrivateBookingDetailPage extends StatelessWidget {
                 value: 'Private Coaching',
               ),
               _DetailRow(
-                icon: Icons.circle,
+                icon: _statusIcon,
+                iconColor: _statusColor,
                 label: 'Status',
                 valueWidget: Container(
                   padding:
@@ -254,12 +270,14 @@ class _PlayersCard extends StatelessWidget {
 
 class _DetailRow extends StatelessWidget {
   final IconData icon;
+  final Color? iconColor;
   final String label;
   final String? value;
   final Widget? valueWidget;
 
   const _DetailRow({
     required this.icon,
+    this.iconColor,
     required this.label,
     this.value,
     this.valueWidget,
@@ -271,7 +289,7 @@ class _DetailRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: AppColors.primary),
+          Icon(icon, size: 18, color: iconColor ?? AppColors.primary),
           const SizedBox(width: 12),
           Text(label,
               style: const TextStyle(fontSize: 13, color: Colors.black54)),

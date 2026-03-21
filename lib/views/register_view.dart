@@ -57,7 +57,7 @@ class RegisterView extends StatelessWidget {
                   ),
                   initialCountryCode: 'IN',
                   onChanged: (phone) {
-                    if (phone.isValidNumber()) model.setPhone(phone.number);
+                    model.setPhone(phone.number);
                   },
                 ),
                 _label('Email *'),
