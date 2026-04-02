@@ -14,6 +14,7 @@ class CoachProfileModel {
   final double? averageRating;
   final int totalReviews;
   final String? profilePictureId;
+  final String? profilePictureUrl;
 
   CoachProfileModel({
     required this.coachId,
@@ -31,6 +32,7 @@ class CoachProfileModel {
     this.averageRating,
     required this.totalReviews,
     this.profilePictureId,
+    this.profilePictureUrl,
   });
 
   factory CoachProfileModel.fromJson(Map<String, dynamic> json) =>
@@ -52,5 +54,6 @@ class CoachProfileModel {
             : null,
         totalReviews: json['total_reviews'] ?? 0,
         profilePictureId: json['profile_picture_id'],
+        profilePictureUrl: json['profile_picture']?['document_url'] ?? json['profile_picture_url'],
       );
 }

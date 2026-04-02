@@ -173,8 +173,74 @@ class _AddTimeOffSheetState extends State<_AddTimeOffSheet> {
     super.dispose();
   }
 
-  String _fmt(TimeOfDay t) =>
-      '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+  String _fmt(TimeOfDay t) {
+    final h = t.hour;
+    final period = h >= 12 ? 'PM' : 'AM';
+    final h12 = h == 0 ? 12 : (h > 12 ? h - 12 : h);
+    return '${h12.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')} $period';
+  }
+
+  void _showTimeSlotPicker(BuildContext context, {required bool isStart}) {
+    // Generate 30-min interval slots from 6 AM to 11 PM
+    final slots = <TimeOfDay>[];
+    for (int h = 6; h <= 23; h++) {
+      slots.add(TimeOfDay(hour: h, minute: 0));
+      if (h < 23) slots.add(TimeOfDay(hour: h, minute: 30));
+    }
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40, height: 4,
+              margin: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
+            ),
+            Text(
+              isStart ? 'Select Start Time' : 'Select End Time',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 300,
+              child: ListView.builder(
+                itemCount: slots.length,
+                itemBuilder: (context, index) {
+                  final slot = slots[index];
+                  final isSelected = isStart
+                      ? (_startTime?.hour == slot.hour && _startTime?.minute == slot.minute)
+                      : (_endTime?.hour == slot.hour && _endTime?.minute == slot.minute);
+                  return ListTile(
+                    title: Text(
+                      _fmt(slot),
+                      style: TextStyle(
+                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
+                        color: isSelected ? const Color(0xFF1D3916) : Colors.black87,
+                      ),
+                    ),
+                    trailing: isSelected ? const Icon(Icons.check, color: Color(0xFF1D3916)) : null,
+                    onTap: () {
+                      setState(() {
+                        if (isStart) _startTime = slot; else _endTime = slot;
+                      });
+                      Navigator.pop(context);
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Future<void> _submit() async {
     if (_date == null) return;
@@ -226,14 +292,9 @@ class _AddTimeOffSheetState extends State<_AddTimeOffSheet> {
             ),
           ),
           const SizedBox(height: 10),
-          // Start time
+          // Start time — dropdown with 30-min intervals
           GestureDetector(
-            onTap: () async {
-              final t = await showTimePicker(
-                  context: context,
-                  initialTime: const TimeOfDay(hour: 8, minute: 0));
-              if (t != null) setState(() => _startTime = t);
-            },
+            onTap: () => _showTimeSlotPicker(context, isStart: true),
             child: _PickerTile(
               icon: Icons.access_time,
               label: _startTime != null
@@ -243,14 +304,9 @@ class _AddTimeOffSheetState extends State<_AddTimeOffSheet> {
             ),
           ),
           const SizedBox(height: 10),
-          // End time
+          // End time — dropdown with 30-min intervals
           GestureDetector(
-            onTap: () async {
-              final t = await showTimePicker(
-                  context: context,
-                  initialTime: const TimeOfDay(hour: 18, minute: 0));
-              if (t != null) setState(() => _endTime = t);
-            },
+            onTap: () => _showTimeSlotPicker(context, isStart: false),
             child: _PickerTile(
               icon: Icons.access_time_filled,
               label: _endTime != null

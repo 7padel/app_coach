@@ -152,15 +152,20 @@ class _AvatarCard extends StatelessWidget {
           CircleAvatar(
             radius: 44,
             backgroundColor: AppColors.primary.withValues(alpha: 0.12),
-            child: Text(
-              profile.fullName.isNotEmpty
-                  ? profile.fullName[0].toUpperCase()
-                  : '?',
-              style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.primary),
-            ),
+            backgroundImage: profile.profilePictureUrl != null && profile.profilePictureUrl!.isNotEmpty
+                ? NetworkImage(profile.profilePictureUrl!)
+                : null,
+            child: profile.profilePictureUrl == null || profile.profilePictureUrl!.isEmpty
+                ? Text(
+                    profile.fullName.isNotEmpty
+                        ? profile.fullName[0].toUpperCase()
+                        : '?',
+                    style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primary),
+                  )
+                : null,
           ),
           const SizedBox(height: 12),
           Text(profile.fullName,
@@ -185,24 +190,7 @@ class _AvatarCard extends StatelessWidget {
                   letterSpacing: 0.5),
             ),
           ),
-          if (profile.averageRating != null) ...[
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.star, color: Color(0xFFF59E0B), size: 18),
-                const SizedBox(width: 4),
-                Text(
-                  profile.averageRating!.toStringAsFixed(1),
-                  style: const TextStyle(
-                      fontSize: 14, fontWeight: FontWeight.w600),
-                ),
-                Text(' (${profile.totalReviews} reviews)',
-                    style: const TextStyle(
-                        fontSize: 12, color: Colors.black45)),
-              ],
-            ),
-          ],
+          // Rating removed from coach profile
         ],
       ),
     );
