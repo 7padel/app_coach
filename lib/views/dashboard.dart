@@ -4,14 +4,15 @@ import 'home_page.dart';
 import 'profile_page.dart';
 
 class Dashboard extends StatefulWidget {
-  const Dashboard({super.key});
+  final int initialTab;
+  const Dashboard({super.key, this.initialTab = 0});
 
   @override
   State<Dashboard> createState() => _DashboardState();
 }
 
 class _DashboardState extends State<Dashboard> {
-  int _selectedIndex = 0;
+  late int _selectedIndex = widget.initialTab;
 
   late final List<Widget> _pages = [
     const HomePage(),
