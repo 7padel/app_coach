@@ -1,8 +1,11 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../core/constants/app_colors.dart';
 import '../core/utils/app_utils.dart';
 import '../core/services/api_service.dart';
 import '../models/coach_profile_model.dart';
+import '../widgets/button.dart';
 
 class EditProfilePage extends StatefulWidget {
   final CoachProfileModel profile;
@@ -17,11 +20,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
   late final TextEditingController _nameCtrl;
   late final TextEditingController _bioCtrl;
   late final TextEditingController _expCtrl;
+  late final TextEditingController _dobCtrl;
 
   String? _gender;
   String? _specializationLevel;
   DateTime? _dob;
   bool _loading = false;
+  bool _imageLoading = false;
+  File? _pickedImage;
+  String? _profileImageUrl;
 
   static const _genders = ['male', 'female'];
   static const _levels = ['beginner', 'intermediate', 'advanced'];
@@ -32,13 +39,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
     final p = widget.profile;
     _nameCtrl = TextEditingController(text: p.fullName);
     _bioCtrl = TextEditingController(text: p.bio ?? '');
-    _expCtrl = TextEditingController(
-        text: p.experienceYears?.toString() ?? '');
+    _expCtrl = TextEditingController(text: p.experienceYears?.toString() ?? '');
     _gender = p.gender;
     _specializationLevel = p.specializationLevel;
-    if (p.dateOfBirth != null) {
-      _dob = DateTime.tryParse(p.dateOfBirth!);
-    }
+    _profileImageUrl = p.profilePictureUrl;
+    if (p.dateOfBirth != null) _dob = DateTime.tryParse(p.dateOfBirth!);
+    _dobCtrl = TextEditingController(
+      text: _dob != null ? '${_dob!.day}/${_dob!.month}/${_dob!.year}' : '',
+    );
   }
 
   @override
@@ -46,7 +54,24 @@ class _EditProfilePageState extends State<EditProfilePage> {
     _nameCtrl.dispose();
     _bioCtrl.dispose();
     _expCtrl.dispose();
+    _dobCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickAndUploadImage() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery, maxWidth: 800);
+    if (picked == null) return;
+    setState(() { _pickedImage = File(picked.path); _imageLoading = true; });
+    try {
+      final docId = await ApiService().uploadDocument(_pickedImage!.path);
+      await ApiService().updateMe(context, {'profile_picture_id': docId});
+      AppUtils.showToast('Profile photo updated');
+    } catch (_) { /* fire-and-forget */
+      AppUtils.showToast('Failed to upload photo');
+    } finally {
+      if (mounted) setState(() => _imageLoading = false);
+    }
   }
 
   Future<void> _save() async {
@@ -57,205 +82,143 @@ class _EditProfilePageState extends State<EditProfilePage> {
         'full_name': _nameCtrl.text.trim(),
         'bio': _bioCtrl.text.trim(),
         if (_gender != null) 'gender': _gender,
-        if (_specializationLevel != null)
-          'specialization_level': _specializationLevel,
-        if (_expCtrl.text.isNotEmpty)
-          'experience_years': int.tryParse(_expCtrl.text),
-        if (_dob != null)
-          'date_of_birth': _dob!.toIso8601String().substring(0, 10),
+        if (_specializationLevel != null) 'specialization_level': _specializationLevel,
+        if (_expCtrl.text.isNotEmpty) 'experience_years': int.tryParse(_expCtrl.text),
+        if (_dob != null) 'date_of_birth': _dob!.toIso8601String().substring(0, 10),
       };
       await ApiService().updateMe(context, payload);
       AppUtils.showToast('Profile updated');
       if (mounted) Navigator.pop(context);
-    } catch (_) {
+    } catch (_) { /* fire-and-forget */
+      AppUtils.showToast('Failed to update profile');
     } finally {
       if (mounted) setState(() => _loading = false);
     }
   }
 
+  InputDecoration _inputDecoration({String? labelText, String? hintText, Widget? suffixIcon}) {
+    return InputDecoration(
+      labelText: labelText,
+      hintText: hintText,
+      filled: true,
+      fillColor: Colors.white,
+      suffixIcon: suffixIcon,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF1D3916))),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF1D3916))),
+      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF1D3916), width: 2)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        title: const Text('Edit Profile',
-            style: TextStyle(fontWeight: FontWeight.w600)),
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              _card([
-                _field(
-                  controller: _nameCtrl,
-                  label: 'Full Name',
-                  validator: (v) =>
-                      v == null || v.trim().isEmpty ? 'Required' : null,
-                ),
-                _dropdown(
-                  label: 'Gender',
-                  value: _gender,
-                  items: _genders,
-                  onChanged: (v) => setState(() => _gender = v),
-                ),
-                _dropdown(
-                  label: 'Specialization Level',
-                  value: _specializationLevel,
-                  items: _levels,
-                  onChanged: (v) =>
-                      setState(() => _specializationLevel = v),
-                ),
-                _field(
-                  controller: _expCtrl,
-                  label: 'Years of Experience',
-                  keyboardType: TextInputType.number,
-                ),
-                _dobPicker(),
-                _field(
-                  controller: _bioCtrl,
-                  label: 'Bio',
-                  maxLines: 3,
-                ),
-              ]),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _loading ? null : _save,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: Column(
+          children: [
+            Container(
+              color: const Color(0xFF1D3916),
+              child: SafeArea(
+                bottom: false,
+                child: Container(
+                  height: 56,
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Row(
+                    children: [
+                      IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: () => Navigator.pop(context)),
+                      const Expanded(child: Center(child: Text('Edit Profile', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600)))),
+                      const SizedBox(width: 48),
+                    ],
                   ),
-                  child: _loading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white))
-                      : const Text('Save Changes',
-                          style: TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.w600)),
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Text('Personal Information', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 20),
 
-  Widget _card(List<Widget> children) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 6,
-              offset: const Offset(0, 2))
-        ],
-      ),
-      child: Column(children: children),
-    );
-  }
+                      // Profile image
+                      GestureDetector(
+                        onTap: _pickAndUploadImage,
+                        child: Stack(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.primary, width: 2)),
+                              child: CircleAvatar(
+                                radius: 40,
+                                backgroundColor: AppColors.secondary.withValues(alpha: 0.3),
+                                backgroundImage: _pickedImage != null
+                                    ? FileImage(_pickedImage!)
+                                    : (_profileImageUrl != null && _profileImageUrl!.isNotEmpty ? NetworkImage(_profileImageUrl!) as ImageProvider : null),
+                                child: _imageLoading
+                                    ? const CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
+                                    : (_pickedImage == null && (_profileImageUrl == null || _profileImageUrl!.isEmpty))
+                                        ? Icon(Icons.person, size: 36, color: AppColors.primary)
+                                        : null,
+                              ),
+                            ),
+                            Positioned(
+                              bottom: 0, right: 0,
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(color: AppColors.primary, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)),
+                                child: const Icon(Icons.add, size: 14, color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 32),
 
-  Widget _field({
-    required TextEditingController controller,
-    required String label,
-    TextInputType? keyboardType,
-    int maxLines = 1,
-    String? Function(String?)? validator,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: keyboardType,
-        maxLines: maxLines,
-        validator: validator,
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        ),
-      ),
-    );
-  }
+                      // Full Name
+                      TextFormField(controller: _nameCtrl, decoration: _inputDecoration(labelText: 'Full Name', hintText: 'Enter your full name'), validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null),
+                      const SizedBox(height: 16),
 
-  Widget _dropdown({
-    required String label,
-    required String? value,
-    required List<String> items,
-    required void Function(String?) onChanged,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: DropdownButtonFormField<String>(
-        initialValue: value,
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        ),
-        items: items
-            .map((e) => DropdownMenuItem(
-                value: e,
-                child: Text(
-                    e[0].toUpperCase() + e.substring(1))))
-            .toList(),
-        onChanged: onChanged,
-      ),
-    );
-  }
+                      // Email (disabled)
+                      TextFormField(enabled: false, initialValue: widget.profile.email ?? '', decoration: _inputDecoration(labelText: 'Email')),
+                      const SizedBox(height: 16),
 
-  Widget _dobPicker() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: GestureDetector(
-        onTap: () async {
-          final picked = await showDatePicker(
-            context: context,
-            initialDate: _dob ?? DateTime(1995),
-            firstDate: DateTime(1950),
-            lastDate: DateTime(DateTime.now().year - 18, DateTime.now().month, DateTime.now().day),
-          );
-          if (picked != null) setState(() => _dob = picked);
-        },
-        child: Container(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade400),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.calendar_today,
-                  size: 18, color: Colors.black45),
-              const SizedBox(width: 10),
-              Text(
-                _dob != null
-                    ? '${_dob!.day}/${_dob!.month}/${_dob!.year}'
-                    : 'Date of Birth',
-                style: TextStyle(
-                    fontSize: 14,
-                    color:
-                        _dob != null ? Colors.black87 : Colors.black45),
+                      // CC + Phone (disabled)
+                      Row(children: [
+                        SizedBox(width: 80, child: TextFormField(enabled: false, initialValue: '+91', decoration: _inputDecoration(labelText: 'CC'))),
+                        const SizedBox(width: 12),
+                        Expanded(child: TextFormField(enabled: false, initialValue: widget.profile.phoneNumber, decoration: _inputDecoration(labelText: 'Phone'))),
+                      ]),
+                      const SizedBox(height: 16),
+
+                      // Date of Birth
+                      TextFormField(
+                        controller: _dobCtrl, readOnly: true,
+                        decoration: _inputDecoration(labelText: 'Date of Birth', hintText: 'Select Date of Birth', suffixIcon: const Icon(Icons.calendar_today_outlined, color: Colors.grey)),
+                        onTap: () async {
+                          final picked = await showDatePicker(context: context, initialDate: _dob ?? DateTime.now().subtract(const Duration(days: 365 * 25)), firstDate: DateTime(1950), lastDate: DateTime.now().subtract(const Duration(days: 365 * 18)));
+                          if (picked != null) setState(() { _dob = picked; _dobCtrl.text = '${picked.day}/${picked.month}/${picked.year}'; });
+                        },
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Description
+                      TextFormField(controller: _bioCtrl, decoration: _inputDecoration(labelText: 'Description', hintText: 'Tell us about yourself'), maxLines: 4),
+                      const SizedBox(height: 32),
+
+                      // Save
+                      SizedBox(width: double.infinity, height: 48, child: Button(onPressed: _loading ? () {} : _save, text: 'Save')),
+                    ],
+                  ),
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

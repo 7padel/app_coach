@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/base/base_view.dart';
 import '../core/constants/app_colors.dart';
+import '../widgets/confirmation_dialog.dart';
 import '../core/utils/date_utils.dart';
 import '../models/coach_time_off_model.dart';
 import '../viewmodels/time_off_view_model.dart';
@@ -14,7 +15,7 @@ class TimeOffsPage extends StatelessWidget {
       model: TimeOffViewModel(),
       onModelReady: (vm) => vm.loadTimeOffs(context),
       builder: (context, vm, _) => Scaffold(
-        backgroundColor: const Color(0xFFF5F5F5),
+        backgroundColor: Colors.white,
         appBar: AppBar(
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
@@ -64,22 +65,16 @@ class TimeOffsPage extends StatelessWidget {
       BuildContext context, TimeOffViewModel vm, CoachTimeOffModel t) {
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Remove Time-off'),
-        content: Text('Remove time-off for ${t.date}?'),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel')),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              vm.deleteTimeOff(context, t.id);
-            },
-            child: const Text('Remove',
-                style: TextStyle(color: Colors.red)),
-          ),
-        ],
+      builder: (_) => ConfirmationDialog(
+        icon: Icons.event_busy,
+        message: 'Remove time-off for ${t.date}?',
+        confirmText: 'Remove',
+        cancelText: 'Cancel',
+        onConfirm: () {
+          Navigator.pop(context);
+          vm.deleteTimeOff(context, t.id);
+        },
+        onCancel: () => Navigator.pop(context),
       ),
     );
   }
@@ -93,63 +88,84 @@ class _TimeOffCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasTime = timeOff.startTime != null;
+    final dateParts = timeOff.date.split('-');
+    final day = dateParts.length >= 3 ? dateParts[2] : '';
+    final month = dateParts.length >= 2 ? _monthShort(int.tryParse(dateParts[1]) ?? 1) : '';
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 6,
-              offset: const Offset(0, 2))
-        ],
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE8E8E8)),
       ),
       child: Row(
         children: [
+          // Date badge
           Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: const Color(0xFFEF4444).withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
+            width: 64,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            decoration: const BoxDecoration(
+              color: Color(0xFF2C4120),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(16),
+                bottomLeft: Radius.circular(16),
+              ),
             ),
-            child: const Icon(Icons.event_busy,
-                color: Color(0xFFEF4444), size: 20),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(DateHelper.prettyDate(timeOff.date),
-                    style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF1A1A1A))),
-                if (hasTime)
-                  Text(
-                    DateHelper.prettyTimeRange(timeOff.startTime, timeOff.endTime),
-                    style: const TextStyle(
-                        fontSize: 12, color: Colors.black54),
-                  ),
-                if (timeOff.reason != null && timeOff.reason!.isNotEmpty)
-                  Text(timeOff.reason!,
-                      style: const TextStyle(
-                          fontSize: 12, color: Colors.black45),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis),
+                Text(day, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: Colors.white)),
+                Text(month, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFFCDDE85))),
               ],
             ),
           ),
+          const SizedBox(width: 14),
+          // Details
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    hasTime ? 'Partial Day Off' : 'Full Day Off',
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFF1A1A1A)),
+                  ),
+                  const SizedBox(height: 4),
+                  if (hasTime)
+                    Row(
+                      children: [
+                        const Icon(Icons.access_time_outlined, size: 14, color: Color(0xFF6B7280)),
+                        const SizedBox(width: 4),
+                        Text(
+                          DateHelper.prettyTimeRange(timeOff.startTime, timeOff.endTime),
+                          style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+                        ),
+                      ],
+                    ),
+                  if (!hasTime)
+                    const Text('All day', style: TextStyle(fontSize: 13, color: Color(0xFF6B7280))),
+                  if (timeOff.reason != null && timeOff.reason!.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(timeOff.reason!, style: const TextStyle(fontSize: 12, color: Colors.black45, fontStyle: FontStyle.italic), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          // Delete
           IconButton(
-            icon:
-                const Icon(Icons.delete_outline, color: Color(0xFFEF4444)),
+            icon: const Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 20),
             onPressed: onDelete,
           ),
         ],
       ),
     );
+  }
+
+  static String _monthShort(int m) {
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return months[(m - 1).clamp(0, 11)];
   }
 }
 
@@ -284,7 +300,7 @@ class _AddTimeOffSheetState extends State<_AddTimeOffSheet> {
               if (d != null) setState(() => _date = d);
             },
             child: _PickerTile(
-              icon: Icons.calendar_today,
+              icon: Icons.calendar_today_outlined,
               label: _date != null
                   ? '${_date!.day}/${_date!.month}/${_date!.year}'
                   : 'Select date *',
@@ -296,7 +312,7 @@ class _AddTimeOffSheetState extends State<_AddTimeOffSheet> {
           GestureDetector(
             onTap: () => _showTimeSlotPicker(context, isStart: true),
             child: _PickerTile(
-              icon: Icons.access_time,
+              icon: Icons.access_time_outlined,
               label: _startTime != null
                   ? 'Start: ${_fmt(_startTime!)}'
                   : 'Start time (optional)',
@@ -338,7 +354,7 @@ class _AddTimeOffSheetState extends State<_AddTimeOffSheet> {
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                    borderRadius: BorderRadius.circular(16)),
               ),
               child: widget.vm.submitting
                   ? const SizedBox(

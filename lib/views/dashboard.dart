@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/constants/app_colors.dart';
-import '../core/utils/page_route_utils.dart';
-import '../core/utils/shared_preferences_util.dart';
 import 'home_page.dart';
-import 'login_view.dart';
-import 'private_bookings_page.dart';
 import 'profile_page.dart';
 
 class Dashboard extends StatefulWidget {
@@ -19,7 +15,6 @@ class _DashboardState extends State<Dashboard> {
 
   late final List<Widget> _pages = [
     const HomePage(),
-    const PrivateBookingsPage(),
     const ProfilePage(),
   ];
 
@@ -53,11 +48,6 @@ class _DashboardState extends State<Dashboard> {
               icon: Icon(Icons.calendar_today_outlined),
               activeIcon: Icon(Icons.calendar_today),
               label: 'Schedule',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_pin_outlined),
-              activeIcon: Icon(Icons.person_pin),
-              label: 'Private',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person_outline),

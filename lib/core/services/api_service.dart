@@ -226,4 +226,19 @@ class ApiService {
     return _delete('coaches/me/time-offs/$id',
         (json) => json, context);
   }
+
+  // Get private booking detail
+  Future<Map<String, dynamic>> getPrivateBookingDetail(BuildContext? context, String bookingId) {
+    return _get('coaches/me/private-bookings/$bookingId', (json) => json['data'] as Map<String, dynamic>, context);
+  }
+
+  // Delete account
+  Future<Map<String, dynamic>> deleteMe(BuildContext? context) {
+    return _delete('coaches/me', (json) => json['data'] ?? {}, context);
+  }
+
+  // Static page (help, terms, privacy)
+  Future<Map<String, dynamic>> getStaticPage(BuildContext? context, String slug) {
+    return _get('static-page/slug/$slug', (json) => json['data'] as Map<String, dynamic>, context);
+  }
 }

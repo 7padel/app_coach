@@ -17,8 +17,7 @@ class CoachApp extends StatelessWidget {
       title: '7Padel Coach',
       theme: ThemeData(
         fontFamily: 'HelveticaNeue',
-        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
-        useMaterial3: false,
+        textTheme: const TextTheme(),
       ),
       home: const SplashPage(),
     );
