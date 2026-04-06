@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:padel_coach/views/status_page.dart';
 import '../core/constants/app_assets.dart';
+import '../core/services/push_notification_service.dart';
 import '../core/utils/page_route_utils.dart';
 import '../core/utils/shared_preferences_util.dart';
 import 'dashboard.dart';
@@ -23,6 +24,9 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
+    Future.microtask(() async {
+      await PushNotificationService().initialize(context);
+    });
     _loadData();
   }
 

@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "306476176360",
+    "project_id": "padel-fe006",
+    "storage_bucket": "padel-fe006.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:306476176360:android:06048b5b04a629fca58a5d",
+        "android_client_info": {
+          "package_name": "com.seven.coach"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "306476176360-phhjka4qkp80r84gd6aebmgf0721cdln.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBWA-wYImgcY0_Tx_Sjzo2Hg2-bgYEB6bk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "306476176360-phhjka4qkp80r84gd6aebmgf0721cdln.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "306476176360-1v71jtt4v7pcngi6v77t5meqihmu4kc4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "id.7padel.dist"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

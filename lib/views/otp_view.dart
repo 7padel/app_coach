@@ -9,6 +9,7 @@ import '../core/constants/app_strings.dart';
 import '../core/utils/page_route_utils.dart';
 import '../core/utils/shared_preferences_util.dart';
 import '../models/verify_otp_response.dart';
+import '../core/services/push_notification_service.dart';
 import '../viewmodels/otp_view_model.dart';
 import '../widgets/button.dart';
 import 'dashboard.dart';
@@ -173,6 +174,9 @@ class OtpView extends StatelessWidget {
     await SharedPreferencesUtil().saveString('token', data.token ?? '');
     await SharedPreferencesUtil().saveString('approval_status', data.approvalStatus ?? 'pending');
     await SharedPreferencesUtil().saveString('coach_name', data.fullName ?? '');
+
+    // Register FCM token after login
+    PushNotificationService().registerSavedToken();
 
     if (!context.mounted) return;
 
