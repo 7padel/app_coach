@@ -118,6 +118,10 @@ class _GroupCoachingTab extends StatelessWidget {
     final today = vm.todaySessions;
     final upcoming = vm.upcomingSessions;
 
+    if (today.isEmpty && upcoming.isEmpty) {
+      return _emptyState('No Upcoming Sessions', 'Your upcoming coaching sessions will appear here.');
+    }
+
     return RefreshIndicator(
       onRefresh: () => vm.refresh(context),
       child: ListView(

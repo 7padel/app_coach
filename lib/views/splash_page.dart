@@ -51,7 +51,7 @@ class _SplashPageState extends State<SplashPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: const Color(0xFFC8DA60),
       body: Center(
         child: Lottie.asset(
           AppAssets.splash_animation,
