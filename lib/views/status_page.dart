@@ -74,7 +74,7 @@ class StatusPage extends StatelessWidget {
                     foregroundColor: Colors.white,
                     side: const BorderSide(color: Colors.white38),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                        borderRadius: BorderRadius.circular(16)),
                   ),
                   child: const Text('Back to Login', style: TextStyle(fontSize: 16)),
                 ),

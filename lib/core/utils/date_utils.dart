@@ -30,13 +30,7 @@ class DateHelper {
     if (dateStr == null || dateStr.isEmpty) return '';
     try {
       final date = DateTime.parse(dateStr);
-      final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
-      final d = DateTime(date.year, date.month, date.day);
-
-      if (d == today) return 'Today';
-      if (d == today.add(const Duration(days: 1))) return 'Tomorrow';
-      return DateFormat('EEE, dd MMM').format(date);
+      return DateFormat('EEE, MMM d').format(date);
     } catch (_) {
       return dateStr;
     }

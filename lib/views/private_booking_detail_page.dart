@@ -9,12 +9,10 @@ class PrivateBookingDetailPage extends StatelessWidget {
 
   Color get _statusColor {
     switch (booking.status.toLowerCase()) {
-      case 'confirmed':
-        return const Color(0xFF22C55E);
-      case 'cancelled':
-        return const Color(0xFFEF4444);
-      default:
-        return const Color(0xFFF59E0B);
+      case 'confirmed': return const Color(0xFF22C55E);
+      case 'completed': return const Color(0xFF3B82F6);
+      case 'cancelled': return const Color(0xFFEF4444);
+      default: return const Color(0xFFF59E0B);
     }
   }
 
@@ -26,264 +24,161 @@ class PrivateBookingDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        title: const Text('Private Booking',
-            style: TextStyle(fontWeight: FontWeight.w600)),
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _InfoCard(children: [
-              _DetailRow(
-                icon: Icons.sports_tennis,
-                label: 'Type',
-                value: 'Private Coaching',
-              ),
-              _DetailRow(
-                icon: Icons.circle,
-                label: 'Status',
-                valueWidget: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: _statusColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    _statusText,
-                    style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: _statusColor),
-                  ),
-                ),
-              ),
-            ]),
-            const SizedBox(height: 12),
-            _InfoCard(children: [
-              _DetailRow(
-                icon: Icons.calendar_today,
-                label: 'Date',
-                value: DateHelper.fullDate(booking.sessionDate),
-              ),
-              _DetailRow(
-                icon: Icons.access_time,
-                label: 'Time',
-                value: DateHelper.prettyTimeRange(
-                    booking.startTime, booking.endTime),
-              ),
-              _DetailRow(
-                icon: Icons.timelapse,
-                label: 'Duration',
-                value: '${booking.durationMinutes} min',
-              ),
-            ]),
-            const SizedBox(height: 12),
-            _InfoCard(children: [
-              if (booking.arenaName != null)
-                _DetailRow(
-                  icon: Icons.location_on_outlined,
-                  label: 'Arena',
-                  value: booking.arenaName!,
-                ),
-              _DetailRow(
-                icon: Icons.payment,
-                label: 'Price',
-                value:
-                    '₹${booking.price.toStringAsFixed(0)}',
-              ),
-              _DetailRow(
-                icon: Icons.receipt_outlined,
-                label: 'Payment',
-                value: booking.paymentStatus,
-              ),
-            ]),
-            if (booking.players.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              _PlayersCard(players: booking.players),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _InfoCard extends StatelessWidget {
-  final List<Widget> children;
-  const _InfoCard({required this.children});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 6,
-              offset: const Offset(0, 2))
-        ],
-      ),
-      child: Column(
-        children: children
-            .expand((w) => [w, const Divider(height: 1)])
-            .toList()
-          ..removeLast(),
-      ),
-    );
-  }
-}
-
-class _PlayersCard extends StatelessWidget {
-  final List<BookingPlayer> players;
-  const _PlayersCard({required this.players});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 6,
-              offset: const Offset(0, 2))
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      backgroundColor: Colors.white,
+      body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 10),
-            child: Row(
-              children: [
-                Icon(Icons.people, size: 20, color: AppColors.primary),
-                const SizedBox(width: 10),
-                const Text('Players',
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF1A1A1A))),
-                const SizedBox(width: 8),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text('${players.length}',
-                      style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primary)),
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 1, indent: 20, endIndent: 20),
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: players.length,
-            separatorBuilder: (_, __) =>
-                const Divider(height: 1, indent: 20, endIndent: 20),
-            itemBuilder: (_, i) {
-              final p = players[i];
-              return Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          // Header
+          Container(
+            width: double.infinity,
+            color: const Color(0xFF1D3916),
+            child: SafeArea(
+              bottom: false,
+              child: Container(
+                height: 56,
+                padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: Row(
                   children: [
-                    CircleAvatar(
-                      radius: 20,
-                      backgroundColor:
-                          AppColors.primary.withValues(alpha: 0.1),
-                      child: Text(
-                        (p.name?.isNotEmpty == true)
-                            ? p.name![0].toUpperCase()
-                            : '?',
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primary),
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(p.name ?? 'Player',
-                              style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF1A1A1A))),
-                          if (p.phone != null) ...[
-                            const SizedBox(height: 4),
-                            Text(p.phone!,
-                                style: const TextStyle(
-                                    fontSize: 14, color: Colors.black45)),
-                          ],
-                        ],
-                      ),
-                    ),
+                    IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: () => Navigator.pop(context)),
+                    const Expanded(child: Center(child: Text('Details', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600)))),
+                    const SizedBox(width: 48),
                   ],
                 ),
-              );
-            },
-          ),
-          const SizedBox(height: 8),
-        ],
-      ),
-    );
-  }
-}
-
-class _DetailRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String? value;
-  final Widget? valueWidget;
-
-  const _DetailRow({
-    required this.icon,
-    required this.label,
-    this.value,
-    this.valueWidget,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: AppColors.primary),
-          const SizedBox(width: 12),
-          Text(label,
-              style: const TextStyle(fontSize: 13, color: Colors.black54)),
-          const Spacer(),
-          valueWidget ??
-              Text(
-                value ?? '-',
-                style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF1A1A1A)),
               ),
+            ),
+          ),
+
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Booking Details header
+                  const Text('Booking Details', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF1D3916))),
+                  const SizedBox(height: 16),
+
+                  // Player name + phone
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(booking.players.isNotEmpty ? (booking.players.first.name ?? 'Player') : 'Player', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                            const SizedBox(height: 2),
+                            Text(booking.players.isNotEmpty ? (booking.players.first.phone ?? '') : '', style: const TextStyle(fontSize: 13, color: Colors.black45)),
+                          ],
+                        ),
+                      ),
+                      CircleAvatar(
+                        radius: 20,
+                        backgroundColor: AppColors.secondary,
+                        child: Icon(Icons.person, color: AppColors.primary, size: 20),
+                      ),
+                    ],
+                  ),
+                  const Divider(height: 32, color: Color(0xFFE8E8E8)),
+
+                  // Date + Time
+                  const Text('Date', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${DateHelper.prettyDate(booking.sessionDate)} ${DateHelper.prettyTimeRange(booking.startTime, booking.endTime)}',
+                    style: const TextStyle(fontSize: 14, color: Colors.black54),
+                  ),
+                  const Divider(height: 32, color: Color(0xFFE8E8E8)),
+
+                  // Arena + Court
+                  const Text('Arena', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 4),
+                  Text('Duration: ${booking.durationMinutes} min', style: const TextStyle(fontSize: 14, color: Colors.black54)),
+                  const Divider(height: 32, color: Color(0xFFE8E8E8)),
+
+                  // Arena name + address
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(booking.arenaName ?? '', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                            const SizedBox(height: 2),
+                            const Text('', style: TextStyle(fontSize: 13, color: Colors.black54)),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(color: AppColors.secondary, shape: BoxShape.circle),
+                        child: Icon(Icons.navigation, size: 18, color: AppColors.primary),
+                      ),
+                    ],
+                  ),
+                  const Divider(height: 32, color: Color(0xFFE8E8E8)),
+
+                  // Status
+                  Row(
+                    children: [
+                      const Text('Status', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                      const SizedBox(width: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        decoration: BoxDecoration(color: _statusColor.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(6)),
+                        child: Text(_statusText, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: _statusColor)),
+                      ),
+                    ],
+                  ),
+                  const Divider(height: 32, color: Color(0xFFE8E8E8)),
+
+                  // Price
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Total', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                          Text('Tax (Inc)', style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
+                        ],
+                      ),
+                      Text('₹${booking.price}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                    ],
+                  ),
+
+                  // Players section
+                  if (booking.players.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        Icon(Icons.people, size: 20, color: AppColors.primary),
+                        const SizedBox(width: 8),
+                        Text('Players', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(16)),
+                          child: Text('${booking.players.length}', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primary)),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    ...booking.players.map((p) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        children: [
+                          CircleAvatar(radius: 16, backgroundColor: Colors.grey.shade200, child: const Icon(Icons.person, size: 16, color: Colors.black45)),
+                          const SizedBox(width: 10),
+                          Text(p.name ?? 'Player', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+                          const Spacer(),
+                          Text(p.phone ?? '', style: const TextStyle(fontSize: 12, color: Colors.black45)),
+                        ],
+                      ),
+                    )),
+                  ],
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

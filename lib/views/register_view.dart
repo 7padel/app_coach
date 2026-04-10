@@ -57,7 +57,7 @@ class RegisterView extends StatelessWidget {
                   ),
                   initialCountryCode: 'IN',
                   onChanged: (phone) {
-                    if (phone.isValidNumber()) model.setPhone(phone.number);
+                    model.setPhone(phone.number);
                   },
                 ),
                 _label('Email *'),
@@ -212,7 +212,7 @@ class RegisterView extends StatelessWidget {
                 style: TextStyle(
                     color: model.dateOfBirth != null ? AppColors.textDark : Colors.black38),
               ),
-              const Icon(Icons.calendar_today, size: 20, color: AppColors.textGrey),
+              const Icon(Icons.calendar_today_outlined, size: 20, color: AppColors.textGrey),
             ],
           ),
         ),

@@ -18,10 +18,23 @@ class SessionDetailPage extends StatelessWidget {
     }
   }
 
+  IconData get _statusIcon {
+    switch (session.status) {
+      case 'confirmed':
+        return Icons.check_circle_outline;
+      case 'completed':
+        return Icons.task_alt;
+      case 'cancelled':
+        return Icons.cancel_outlined;
+      default:
+        return Icons.schedule;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
@@ -37,7 +50,7 @@ class SessionDetailPage extends StatelessWidget {
             // Header card
             _InfoCard(children: [
               _DetailRow(
-                icon: Icons.sports_tennis,
+                icon: Icons.sports_tennis_outlined,
                 label: 'Title',
                 value: session.coaching?.title ?? 'Session',
               ),
@@ -47,7 +60,7 @@ class SessionDetailPage extends StatelessWidget {
                 value: session.coaching?.coachingType ?? '–',
               ),
               _DetailRow(
-                icon: Icons.circle,
+                icon: _statusIcon,
                 label: 'Status',
                 valueWidget: Container(
                   padding:
@@ -72,12 +85,12 @@ class SessionDetailPage extends StatelessWidget {
             // Date & Time card
             _InfoCard(children: [
               _DetailRow(
-                icon: Icons.calendar_today,
+                icon: Icons.calendar_today_outlined,
                 label: 'Date',
                 value: DateHelper.fullDate(session.sessionDate),
               ),
               _DetailRow(
-                icon: Icons.access_time,
+                icon: Icons.access_time_outlined,
                 label: 'Time',
                 value: DateHelper.prettyTimeRange(session.startTime, session.endTime),
               ),
@@ -121,12 +134,12 @@ class _InfoCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 6,
-              offset: const Offset(0, 2))
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 10,
+              offset: const Offset(0, 4))
         ],
       ),
       child: Column(
@@ -149,12 +162,12 @@ class _PlayersCard extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 6,
-              offset: const Offset(0, 2))
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 10,
+              offset: const Offset(0, 4))
         ],
       ),
       child: Column(

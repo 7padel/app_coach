@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:padel_coach/views/status_page.dart';
-import '../core/constants/app_colors.dart';
+import '../core/constants/app_assets.dart';
+import '../core/services/push_notification_service.dart';
 import '../core/utils/page_route_utils.dart';
 import '../core/utils/shared_preferences_util.dart';
 import 'dashboard.dart';
@@ -14,26 +16,38 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
+  bool _animationDone = false;
+  bool _dataReady = false;
+  String? _token;
+  String? _approvalStatus;
+
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 2), _navigate);
+    Future.microtask(() async {
+      await PushNotificationService().initialize(context);
+    });
+    _loadData();
   }
 
-  void _navigate() async {
-    final token = await SharedPreferencesUtil().getString('token');
-    final approvalStatus = await SharedPreferencesUtil().getString('approval_status');
+  Future<void> _loadData() async {
+    _token = await SharedPreferencesUtil().getString('token');
+    _approvalStatus = await SharedPreferencesUtil().getString('approval_status');
+    _dataReady = true;
+    _tryProceed();
+  }
 
-    if (!mounted) return;
+  void _tryProceed() {
+    if (!_animationDone || !_dataReady || !mounted) return;
 
-    if (token == null || token.isEmpty) {
+    if (_token == null || _token!.isEmpty) {
       PageRouteUtils.pushWithZoom(context, const LoginView());
-    } else if (approvalStatus == 'approved') {
+    } else if (_approvalStatus == 'approved') {
       PageRouteUtils.pushWithZoom(context, const Dashboard());
     } else {
       PageRouteUtils.pushWithZoom(
         context,
-        StatusPage(approvalStatus: approvalStatus ?? 'pending'),
+        StatusPage(approvalStatus: _approvalStatus ?? 'pending'),
       );
     }
   }
@@ -41,22 +55,17 @@ class _SplashPageState extends State<SplashPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primary,
+      backgroundColor: const Color(0xFFC8DA60),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.sports_tennis, size: 80, color: AppColors.secondary),
-            const SizedBox(height: 16),
-            const Text(
-              '7Padel Coach',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
+        child: Lottie.asset(
+          AppAssets.splash_animation,
+          repeat: false,
+          onLoaded: (composition) {
+            Future.delayed(composition.duration, () {
+              _animationDone = true;
+              _tryProceed();
+            });
+          },
         ),
       ),
     );

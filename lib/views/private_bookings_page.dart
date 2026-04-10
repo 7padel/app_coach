@@ -15,7 +15,7 @@ class PrivateBookingsPage extends StatelessWidget {
       model: PrivateBookingsViewModel(),
       onModelReady: (vm) => vm.loadBookings(context),
       builder: (context, vm, _) => Scaffold(
-        backgroundColor: const Color(0xFFF5F5F5),
+        backgroundColor: Colors.white,
         appBar: AppBar(
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
@@ -104,12 +104,12 @@ class _BookingCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
               color: Colors.black.withValues(alpha: 0.06),
               blurRadius: 8,
-              offset: const Offset(0, 2))
+              offset: const Offset(0, 4))
         ],
       ),
       child: Padding(
@@ -150,13 +150,13 @@ class _BookingCard extends StatelessWidget {
             const SizedBox(height: 8),
             Row(
               children: [
-                const Icon(Icons.calendar_today, size: 13, color: Colors.black45),
+                const Icon(Icons.calendar_today_outlined, size: 13, color: Colors.black45),
                 const SizedBox(width: 4),
                 Text(DateHelper.prettyDate(booking.sessionDate),
                     style:
                         const TextStyle(fontSize: 12, color: Colors.black54)),
                 const SizedBox(width: 12),
-                const Icon(Icons.access_time, size: 13, color: Colors.black45),
+                const Icon(Icons.access_time_outlined, size: 13, color: Colors.black45),
                 const SizedBox(width: 4),
                 Text(DateHelper.prettyTimeRange(booking.startTime, booking.endTime),
                     style:
@@ -167,7 +167,7 @@ class _BookingCard extends StatelessWidget {
               const SizedBox(height: 4),
               Row(
                 children: [
-                  const Icon(Icons.location_on, size: 13, color: Colors.black45),
+                  const Icon(Icons.place_outlined, size: 13, color: Colors.black45),
                   const SizedBox(width: 4),
                   Text(booking.arenaName!,
                       style:
