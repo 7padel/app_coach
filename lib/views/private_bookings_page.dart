@@ -1,3 +1,4 @@
+import '../core/theme/phase2_theme.dart';
 import 'package:flutter/material.dart';
 import '../core/base/base_view.dart';
 import '../core/constants/app_colors.dart';
@@ -14,24 +15,32 @@ class PrivateBookingsPage extends StatelessWidget {
     return BaseView<PrivateBookingsViewModel>(
       model: PrivateBookingsViewModel(),
       onModelReady: (vm) => vm.loadBookings(context),
-      builder: (context, vm, _) => Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
-          title: const Text('Private Bookings',
-              style: TextStyle(fontWeight: FontWeight.w600)),
-          elevation: 0,
-        ),
-        body: vm.isLoading && vm.bookings.isEmpty
-            ? const Center(child: CircularProgressIndicator())
-            : RefreshIndicator(
-                onRefresh: () => vm.loadBookings(context, refresh: true),
-                child: vm.bookings.isEmpty
-                    ? _EmptyState()
-                    : _BookingList(vm: vm),
+      builder:
+          (context, vm, _) => Phase2Surface(
+            child: Scaffold(
+              backgroundColor: Phase2Style.canvas,
+              appBar: AppBar(
+                backgroundColor: Colors.white,
+                foregroundColor: Phase2Style.ink,
+                title: const Text(
+                  'Private Bookings',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                elevation: 0,
               ),
-      ),
+              body:
+                  vm.isLoading && vm.bookings.isEmpty
+                      ? const Center(child: CircularProgressIndicator())
+                      : RefreshIndicator(
+                        onRefresh:
+                            () => vm.loadBookings(context, refresh: true),
+                        child:
+                            vm.bookings.isEmpty
+                                ? _EmptyState()
+                                : _BookingList(vm: vm),
+                      ),
+            ),
+          ),
     );
   }
 }
@@ -50,12 +59,14 @@ class _BookingList extends StatelessWidget {
           return Center(
             child: TextButton(
               onPressed: () => vm.loadMore(context),
-              child: vm.isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Text('Load more'),
+              child:
+                  vm.isLoading
+                      ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                      : const Text('Load more'),
             ),
           );
         }
@@ -87,113 +98,148 @@ class _BookingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final playerName = booking.players.isNotEmpty
-        ? booking.players.first.name ?? 'Player'
-        : 'Player';
-    final extraPlayers = booking.players.length > 1
-        ? ' +${booking.players.length - 1}'
-        : '';
+    final playerName =
+        booking.players.isNotEmpty
+            ? booking.players.first.name ?? 'Player'
+            : 'Player';
+    final extraPlayers =
+        booking.players.length > 1 ? ' +${booking.players.length - 1}' : '';
 
     return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (_) => PrivateBookingDetailPage(booking: booking)),
-      ),
+      onTap:
+          () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => PrivateBookingDetailPage(booking: booking),
+            ),
+          ),
       child: Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
+        margin: const EdgeInsets.only(bottom: 10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
               color: Colors.black.withValues(alpha: 0.06),
               blurRadius: 8,
-              offset: const Offset(0, 4))
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.person_outline, size: 16, color: Colors.black54),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    '$playerName$extraPlayers',
-                    style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF1A1A1A)),
-                  ),
-                ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: _statusColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    _statusText,
-                    style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: _statusColor),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(Icons.calendar_today_outlined, size: 13, color: Colors.black45),
-                const SizedBox(width: 4),
-                Text(DateHelper.prettyDate(booking.sessionDate),
-                    style:
-                        const TextStyle(fontSize: 12, color: Colors.black54)),
-                const SizedBox(width: 12),
-                const Icon(Icons.access_time_outlined, size: 13, color: Colors.black45),
-                const SizedBox(width: 4),
-                Text(DateHelper.prettyTimeRange(booking.startTime, booking.endTime),
-                    style:
-                        const TextStyle(fontSize: 12, color: Colors.black54)),
-              ],
-            ),
-            if (booking.arenaName != null) ...[
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  const Icon(Icons.place_outlined, size: 13, color: Colors.black45),
-                  const SizedBox(width: 4),
-                  Text(booking.arenaName!,
-                      style:
-                          const TextStyle(fontSize: 12, color: Colors.black54)),
-                ],
-              ),
-            ],
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('${booking.durationMinutes} min',
-                    style: const TextStyle(fontSize: 12, color: Colors.black45)),
-                Text(
-                  '₹${booking.price.toStringAsFixed(0)}',
-                  style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primary),
-                ),
-              ],
+              offset: const Offset(0, 4),
             ),
           ],
         ),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(
+                    Icons.person_outline,
+                    size: 16,
+                    color: Colors.black54,
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      '$playerName$extraPlayers',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF1A1A1A),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _statusColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      _statusText,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: _statusColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.calendar_today_outlined,
+                    size: 13,
+                    color: Colors.black45,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    DateHelper.prettyDate(booking.sessionDate),
+                    style: const TextStyle(fontSize: 12, color: Colors.black54),
+                  ),
+                  const SizedBox(width: 12),
+                  const Icon(
+                    Icons.access_time_outlined,
+                    size: 13,
+                    color: Colors.black45,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    DateHelper.prettyTimeRange(
+                      booking.startTime,
+                      booking.endTime,
+                    ),
+                    style: const TextStyle(fontSize: 12, color: Colors.black54),
+                  ),
+                ],
+              ),
+              if (booking.arenaName != null) ...[
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.place_outlined,
+                      size: 13,
+                      color: Colors.black45,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      booking.arenaName!,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '${booking.durationMinutes} min',
+                    style: const TextStyle(fontSize: 12, color: Colors.black45),
+                  ),
+                  Text(
+                    '₹${booking.price.toStringAsFixed(0)}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
-    ),
     );
   }
 }
@@ -207,8 +253,10 @@ class _EmptyState extends StatelessWidget {
         const Icon(Icons.person_pin_outlined, size: 64, color: Colors.black26),
         const SizedBox(height: 16),
         const Center(
-          child: Text('No private bookings yet',
-              style: TextStyle(fontSize: 16, color: Colors.black45)),
+          child: Text(
+            'No private bookings yet',
+            style: TextStyle(fontSize: 16, color: Colors.black45),
+          ),
         ),
       ],
     );

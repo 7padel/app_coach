@@ -1,3 +1,4 @@
+import '../core/theme/phase2_theme.dart';
 import 'package:flutter/material.dart';
 import '../core/base/base_view.dart';
 import '../core/constants/app_colors.dart';
@@ -21,41 +22,47 @@ class ProfilePage extends StatelessWidget {
     return BaseView<ProfileViewModel>(
       model: ProfileViewModel(),
       onModelReady: (vm) => vm.loadProfile(context),
-      builder: (context, vm, _) => Scaffold(
-        backgroundColor: const Color(0xFFF9F9F9),
-        body: Column(
-          children: [
-            Container(
-              color: const Color(0xFF1D3916),
-              child: SafeArea(
-                bottom: false,
-                child: Container(
-                  height: 56,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: const Center(
-                    child: Text(
-                      'Settings',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
+      builder:
+          (context, vm, _) => Phase2Surface(
+            child: Scaffold(
+              backgroundColor: Phase2Style.canvas,
+              body: Column(
+                children: [
+                  Container(
+                    color: const Color(0xFF1D3916),
+                    child: SafeArea(
+                      bottom: false,
+                      child: Container(
+                        height: 56,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: const Center(
+                          child: Text(
+                            'Settings',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child:
+                        vm.isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : vm.profile == null
+                            ? const Center(
+                              child: Text('Failed to load profile'),
+                            )
+                            : _buildContent(context, vm),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: vm.isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : vm.profile == null
-                      ? const Center(child: Text('Failed to load profile'))
-                      : _buildContent(context, vm),
-            ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
@@ -83,7 +90,7 @@ class ProfilePage extends StatelessWidget {
                       p.fullName,
                       style: const TextStyle(
                         fontSize: 18,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w600,
                         color: Color(0xFF1D3916),
                       ),
                     ),
@@ -91,12 +98,20 @@ class ProfilePage extends StatelessWidget {
                   CircleAvatar(
                     radius: 28,
                     backgroundColor: AppColors.secondary,
-                    backgroundImage: p.profilePictureUrl != null && p.profilePictureUrl!.isNotEmpty
-                        ? NetworkImage(p.profilePictureUrl!)
-                        : null,
-                    child: p.profilePictureUrl == null || p.profilePictureUrl!.isEmpty
-                        ? Icon(Icons.person, size: 28, color: AppColors.primary)
-                        : null,
+                    backgroundImage:
+                        p.profilePictureUrl != null &&
+                                p.profilePictureUrl!.isNotEmpty
+                            ? NetworkImage(p.profilePictureUrl!)
+                            : null,
+                    child:
+                        p.profilePictureUrl == null ||
+                                p.profilePictureUrl!.isEmpty
+                            ? Icon(
+                              Icons.person,
+                              size: 28,
+                              color: AppColors.primary,
+                            )
+                            : null,
                   ),
                 ],
               ),
@@ -112,7 +127,9 @@ class ProfilePage extends StatelessWidget {
                 onTap: () async {
                   await Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => EditProfilePage(profile: p)),
+                    MaterialPageRoute(
+                      builder: (_) => EditProfilePage(profile: p),
+                    ),
                   );
                   vm.loadProfile(context);
                 },
@@ -150,20 +167,24 @@ class ProfilePage extends StatelessWidget {
                 onTap: () {
                   showDialog(
                     context: context,
-                    builder: (ctx) => ConfirmationDialog(
-                      icon: Icons.logout,
-                      message: 'Are you sure to log out\nof your account?',
-                      confirmText: 'Log Out',
-                      cancelText: 'Cancel',
-                      onConfirm: () async {
-                        Navigator.pop(ctx);
-                        await SharedPreferencesUtil().clear();
-                        if (context.mounted) {
-                          PageRouteUtils.pushAndRemoveUntil(context, const LoginView());
-                        }
-                      },
-                      onCancel: () => Navigator.pop(ctx),
-                    ),
+                    builder:
+                        (ctx) => ConfirmationDialog(
+                          icon: Icons.logout,
+                          message: 'Are you sure to log out\nof your account?',
+                          confirmText: 'Log Out',
+                          cancelText: 'Cancel',
+                          onConfirm: () async {
+                            Navigator.pop(ctx);
+                            await SharedPreferencesUtil().clear();
+                            if (context.mounted) {
+                              PageRouteUtils.pushAndRemoveUntil(
+                                context,
+                                const LoginView(),
+                              );
+                            }
+                          },
+                          onCancel: () => Navigator.pop(ctx),
+                        ),
                   );
                 },
               ),
@@ -173,25 +194,30 @@ class ProfilePage extends StatelessWidget {
                 onTap: () {
                   showDialog(
                     context: context,
-                    builder: (ctx) => ConfirmationDialog(
-                      icon: Icons.delete,
-                      message: 'All your records will be deleted.\nAre you sure you want to do this?',
-                      confirmText: 'Delete',
-                      cancelText: 'Cancel',
-                      onConfirm: () async {
-                        Navigator.pop(ctx);
-                        try {
-                          await ApiService().deleteMe(context);
-                          await SharedPreferencesUtil().clear();
-                          if (context.mounted) {
-                            PageRouteUtils.pushAndRemoveUntil(context, const LoginView());
-                          }
-                        } catch (_) {
-                          AppUtils.showToast('Failed to delete account');
-                        }
-                      },
-                      onCancel: () => Navigator.pop(ctx),
-                    ),
+                    builder:
+                        (ctx) => ConfirmationDialog(
+                          icon: Icons.delete,
+                          message:
+                              'All your records will be deleted.\nAre you sure you want to do this?',
+                          confirmText: 'Delete',
+                          cancelText: 'Cancel',
+                          onConfirm: () async {
+                            Navigator.pop(ctx);
+                            try {
+                              await ApiService().deleteMe(context);
+                              await SharedPreferencesUtil().clear();
+                              if (context.mounted) {
+                                PageRouteUtils.pushAndRemoveUntil(
+                                  context,
+                                  const LoginView(),
+                                );
+                              }
+                            } catch (_) {
+                              AppUtils.showToast('Failed to delete account');
+                            }
+                          },
+                          onCancel: () => Navigator.pop(ctx),
+                        ),
                   );
                 },
               ),

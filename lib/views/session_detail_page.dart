@@ -1,3 +1,4 @@
+import '../core/theme/phase2_theme.dart';
 import 'package:flutter/material.dart';
 import '../core/constants/app_colors.dart';
 import '../core/utils/date_utils.dart';
@@ -33,94 +34,110 @@ class SessionDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        title: const Text('Session Details',
-            style: TextStyle(fontWeight: FontWeight.w600)),
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header card
-            _InfoCard(children: [
-              _DetailRow(
-                icon: Icons.sports_tennis_outlined,
-                label: 'Title',
-                value: session.coaching?.title ?? 'Session',
-              ),
-              _DetailRow(
-                icon: Icons.category_outlined,
-                label: 'Type',
-                value: session.coaching?.coachingType ?? '–',
-              ),
-              _DetailRow(
-                icon: _statusIcon,
-                label: 'Status',
-                valueWidget: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: _statusColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(6),
+    return Phase2Surface(
+      child: Scaffold(
+        backgroundColor: Phase2Style.canvas,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          foregroundColor: Phase2Style.ink,
+          title: const Text(
+            'Session Details',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
+          elevation: 0,
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header card
+              _InfoCard(
+                children: [
+                  _DetailRow(
+                    icon: Icons.sports_tennis_outlined,
+                    label: 'Title',
+                    value: session.coaching?.title ?? 'Session',
                   ),
-                  child: Text(
-                    session.status.isNotEmpty
-                        ? session.status[0].toUpperCase() + session.status.substring(1)
-                        : session.status,
-                    style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: _statusColor),
+                  _DetailRow(
+                    icon: Icons.category_outlined,
+                    label: 'Type',
+                    value: session.coaching?.coachingType ?? '–',
                   ),
-                ),
+                  _DetailRow(
+                    icon: _statusIcon,
+                    label: 'Status',
+                    valueWidget: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _statusColor.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        session.status.isNotEmpty
+                            ? session.status[0].toUpperCase() +
+                                session.status.substring(1)
+                            : session.status,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: _statusColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ]),
-            const SizedBox(height: 12),
-            // Date & Time card
-            _InfoCard(children: [
-              _DetailRow(
-                icon: Icons.calendar_today_outlined,
-                label: 'Date',
-                value: DateHelper.fullDate(session.sessionDate),
-              ),
-              _DetailRow(
-                icon: Icons.access_time_outlined,
-                label: 'Time',
-                value: DateHelper.prettyTimeRange(session.startTime, session.endTime),
-              ),
-            ]),
-            const SizedBox(height: 12),
-            // Venue & Players card
-            _InfoCard(children: [
-              if (session.arenaName != null)
-                _DetailRow(
-                  icon: Icons.location_on_outlined,
-                  label: 'Arena',
-                  value: session.arenaName!,
-                ),
-              _DetailRow(
-                icon: Icons.people_outline,
-                label: 'Players',
-                value:
-                    '${session.registeredPlayers.isNotEmpty ? session.registeredPlayers.length : session.registeredCount} / ${session.coaching?.maxPlayers ?? '–'} registered',
-              ),
-            ]),
-            if (session.registeredPlayers.isNotEmpty) ...[
               const SizedBox(height: 12),
-              _PlayersCard(players: session.registeredPlayers),
+              // Date & Time card
+              _InfoCard(
+                children: [
+                  _DetailRow(
+                    icon: Icons.calendar_today_outlined,
+                    label: 'Date',
+                    value: DateHelper.fullDate(session.sessionDate),
+                  ),
+                  _DetailRow(
+                    icon: Icons.access_time_outlined,
+                    label: 'Time',
+                    value: DateHelper.prettyTimeRange(
+                      session.startTime,
+                      session.endTime,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              // Venue & Players card
+              _InfoCard(
+                children: [
+                  if (session.arenaName != null)
+                    _DetailRow(
+                      icon: Icons.location_on_outlined,
+                      label: 'Arena',
+                      value: session.arenaName!,
+                    ),
+                  _DetailRow(
+                    icon: Icons.people_outline,
+                    label: 'Players',
+                    value:
+                        '${session.registeredPlayers.isNotEmpty ? session.registeredPlayers.length : session.registeredCount} / ${session.coaching?.maxPlayers ?? '–'} registered',
+                  ),
+                ],
+              ),
+              if (session.registeredPlayers.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                _PlayersCard(players: session.registeredPlayers),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
   }
-
 }
 
 class _InfoCard extends StatelessWidget {
@@ -137,16 +154,16 @@ class _InfoCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 10,
-              offset: const Offset(0, 4))
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 4,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: Column(
-        children: children
-            .expand((w) => [w, const Divider(height: 1)])
-            .toList()
-          ..removeLast(),
+        children:
+            children.expand((w) => [w, const Divider(height: 1)]).toList()
+              ..removeLast(),
       ),
     );
   }
@@ -165,9 +182,10 @@ class _PlayersCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 10,
-              offset: const Offset(0, 4))
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 4,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: Column(
@@ -179,23 +197,34 @@ class _PlayersCard extends StatelessWidget {
               children: [
                 Icon(Icons.people, size: 16, color: AppColors.primary),
                 const SizedBox(width: 8),
-                Text('Registered Players',
+                Expanded(
+                  child: Text(
+                    'Registered players',
                     style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF1A1A1A))),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1A1A1A),
+                    ),
+                  ),
+                ),
                 const SizedBox(width: 6),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Text('${players.length}',
-                      style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primary)),
+                  child: Text(
+                    '${players.length}',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -209,18 +238,24 @@ class _PlayersCard extends StatelessWidget {
             itemBuilder: (_, i) {
               final p = players[i];
               return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 child: Row(
                   children: [
                     CircleAvatar(
                       radius: 16,
                       backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                       child: Text(
-                        (p.name?.isNotEmpty == true) ? p.name![0].toUpperCase() : '?',
+                        (p.name?.isNotEmpty == true)
+                            ? p.name![0].toUpperCase()
+                            : '?',
                         style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primary),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primary,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -228,15 +263,22 @@ class _PlayersCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(p.name ?? 'Player',
-                              style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xFF1A1A1A))),
+                          Text(
+                            p.name ?? 'Player',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFF1A1A1A),
+                            ),
+                          ),
                           if (p.phone != null)
-                            Text(p.phone!,
-                                style: const TextStyle(
-                                    fontSize: 11, color: Colors.black45)),
+                            Text(
+                              p.phone!,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: Colors.black45,
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -266,26 +308,36 @@ class _DetailRow extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: AppColors.primary),
-          const SizedBox(width: 12),
-          Text(label,
-              style: const TextStyle(fontSize: 13, color: Colors.black54)),
-          const Spacer(),
-          valueWidget ??
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 14),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 18, color: Phase2Style.forest),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               Text(
-                value ?? '–',
-                style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF1A1A1A)),
+                label,
+                style: const TextStyle(fontSize: 12, color: Phase2Style.muted),
               ),
-        ],
-      ),
-    );
-  }
+              const SizedBox(height: 6),
+              valueWidget ??
+                  Text(
+                    value ?? '–',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      height: 1.4,
+                      fontWeight: FontWeight.w500,
+                      color: Phase2Style.ink,
+                    ),
+                  ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
 }

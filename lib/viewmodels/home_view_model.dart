@@ -5,6 +5,8 @@ import '../models/coaching_session_model.dart';
 
 class HomeViewModel extends BaseViewModel {
   CoachProfileModel? profile;
+  String? sessionError;
+  String? privateError;
 
   // Tab: 0 = Group Coaching, 1 = Private Booking
   int _selectedTab = 0;
@@ -36,7 +38,11 @@ class HomeViewModel extends BaseViewModel {
   bool _privateLoading = false;
   bool get privateLoading => _privateLoading;
 
-  Future<void> loadSessions(BuildContext context, {bool refresh = false}) async {
+  Future<void> loadSessions(
+    BuildContext context, {
+    bool refresh = false,
+  }) async {
+    sessionError = null;
     if (refresh) {
       _currentPage = 1;
       _sessions = [];
@@ -49,15 +55,21 @@ class HomeViewModel extends BaseViewModel {
         try {
           final profileData = await apiService.getMe(context);
           profile = CoachProfileModel.fromJson(profileData);
-        } catch (_) { /* non-critical */ }
+        } catch (_) {
+          /* non-critical */
+        }
       }
       final data = await apiService.getSessions(context, page: _currentPage);
-      final list = (data['sessions'] as List<dynamic>? ?? [])
-          .map((e) => CoachingSessionModel.fromJson(e as Map<String, dynamic>))
-          .toList();
+      final list =
+          (data['sessions'] as List<dynamic>? ?? [])
+              .map(
+                (e) => CoachingSessionModel.fromJson(e as Map<String, dynamic>),
+              )
+              .toList();
       _sessions = refresh ? list : [..._sessions, ...list];
       _totalPages = data['total_pages'] ?? 1;
     } catch (_) {
+      sessionError = 'Check your connection and try again.';
       // error shown by ApiService
     } finally {
       setLoading(false);
@@ -71,12 +83,16 @@ class HomeViewModel extends BaseViewModel {
   }
 
   Future<void> loadPrivateBookings(BuildContext context) async {
+    privateError = null;
     _privateLoading = true;
     notifyListeners();
     try {
       final data = await apiService.getPrivateBookings(context);
-      _privateBookings = List<Map<String, dynamic>>.from(data['private_bookings'] ?? data['bookings'] ?? []);
+      _privateBookings = List<Map<String, dynamic>>.from(
+        data['private_bookings'] ?? data['bookings'] ?? [],
+      );
     } catch (_) {
+      privateError = 'Check your connection and try again.';
       // error shown by ApiService
     } finally {
       _privateLoading = false;
